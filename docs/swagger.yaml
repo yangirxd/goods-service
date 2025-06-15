@@ -1,0 +1,308 @@
+basePath: /
+definitions:
+  models.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      details: {}
+      message:
+        type: string
+    type: object
+  models.Good:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      priority:
+        type: integer
+      project_id:
+        type: integer
+      removed:
+        type: boolean
+    type: object
+  models.GoodCreate:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: integer
+    required:
+    - name
+    - project_id
+    type: object
+  models.GoodUpdate:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+  models.ListMeta:
+    properties:
+      limit:
+        description: какое ограничение стоит на вывод объектов
+        type: integer
+      offset:
+        description: от какой позиции выводить данные в списке
+        type: integer
+      removed:
+        description: сколько записей со статусом removed = true
+        type: integer
+      total:
+        description: сколько всего записей
+        type: integer
+    type: object
+  models.ListResponse:
+    properties:
+      goods:
+        items:
+          $ref: '#/definitions/models.Good'
+        type: array
+      meta:
+        $ref: '#/definitions/models.ListMeta'
+    type: object
+  models.PriorityInfo:
+    properties:
+      id:
+        type: integer
+      priority:
+        type: integer
+    type: object
+  models.ReprioritizeRequest:
+    properties:
+      newPriority:
+        type: integer
+    required:
+    - newPriority
+    type: object
+  models.ReprioritizeResponse:
+    properties:
+      priorities:
+        items:
+          $ref: '#/definitions/models.PriorityInfo'
+        type: array
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Service for managing goods with caching and event logging.
+  title: Goods Service API
+  version: "1.0"
+paths:
+  /goods/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new good with the provided data
+      parameters:
+      - description: Good data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.GoodCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Good'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Create a new good
+      tags:
+      - goods
+  /goods/delete/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Mark a good as deleted by its ID
+      parameters:
+      - description: Good ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Delete a good
+      tags:
+      - goods
+  /goods/get/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a good by its ID with Redis caching
+      parameters:
+      - description: Good ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Good'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get a good by ID
+      tags:
+      - goods
+  /goods/list:
+    get:
+      consumes:
+      - application/json
+      description: Get list of goods with pagination
+      parameters:
+      - description: 'Limit number of records (default: 10)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Offset for pagination (default: 0)'
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: List goods
+      tags:
+      - goods
+  /goods/reprioritize:
+    patch:
+      consumes:
+      - application/json
+      description: Change priority of a good and update priorities of subsequent goods
+      parameters:
+      - description: Good ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      - description: Project ID
+        in: query
+        name: projectId
+        required: true
+        type: integer
+      - description: New priority
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.ReprioritizeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ReprioritizeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Reprioritize a good
+      tags:
+      - goods
+  /goods/update/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Update a good by its ID
+      parameters:
+      - description: Good ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Good update data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.GoodUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Good'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Update a good
+      tags:
+      - goods
+swagger: "2.0"
