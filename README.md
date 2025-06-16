@@ -2,6 +2,20 @@
 
 Сервис для управления товарами с поддержкой приоритезации, кэширования в Redis и логированием в ClickHouse.
 
+## Используемые библиотеки
+
+### Основные зависимости
+- [gin-gonic/gin](https://github.com/gin-gonic/gin) - HTTP веб-фреймворк
+- [redis/go-redis](https://github.com/redis/go-redis) - Redis клиент для Go
+- [lib/pq](https://github.com/lib/pq) v1.10.9 - PostgreSQL драйвер
+- [ClickHouse/clickhouse-go](https://github.com/ClickHouse/clickhouse-go) - ClickHouse драйвер
+- [nats-io/nats.go](https://github.com/nats-io/nats.go) - NATS клиент для очереди сообщений
+
+### Документация API
+- [swaggo/swag](https://github.com/swaggo/swag) - Swagger генератор для Go
+- [swaggo/gin-swagger](https://github.com/swaggo/gin-swagger) - Swagger UI для Gin
+- [swaggo/files](https://github.com/swaggo/files) - Статические файлы для Swagger UI
+
 ## Быстрый старт
 
 1. Клонируйте репозиторий
